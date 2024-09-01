@@ -1,15 +1,22 @@
 // module aliases
-var Engine = Matter.Engine,
-  Render = Matter.Render,
-  Runner = Matter.Runner,
-  Bodies = Matter.Bodies,
-  Composite = Matter.Composite;
+const Engine = Matter.Engine;
+const Render = Matter.Render;
+const Runner = Matter.Runner;
+const Bodies = Matter.Bodies;
+const Composite = Matter.Composite;
 
 // create an engine
-var engine = Engine.create();
+var engine = Engine.create({
+  gravity: {
+    x: 0,
+    y: 0.5,
+  },
+});
 
-let screenWidth = window.innerWidth;
-let screenHeight = window.innerHeight;
+const screenWidth = window.innerWidth;
+const screenHeight = window.innerHeight;
+const halfScreenWidth = screenWidth / 2;
+const halfScreenHeight = screenHeight / 2;
 
 let canvasOptions = {
   height: screenHeight,
@@ -23,33 +30,51 @@ var render = Render.create({
   options: canvasOptions,
 });
 
-var ground = Bodies.rectangle(
-  0 + screenWidth / 2,
-  screenHeight - 30,
+const topWall = Bodies.rectangle(screenWidth / 2, -10, screenWidth, 20, {
+  isStatic: true,
+});
+
+const bottomWall = Bodies.rectangle(
+  screenWidth / 2,
+  screenHeight + 10,
   screenWidth,
-  60,
+  20,
   {
     isStatic: true,
   }
 );
 
+const leftWall = Bodies.rectangle(-10, screenHeight / 2, 20, screenHeight, {
+  isStatic: true,
+});
+
 // add all of the bodies to the world
-Composite.add(engine.world, ground);
+Composite.add(engine.world, [topWall, bottomWall, leftWall]);
 
-const box = (e) =>
-  Bodies.rectangle(
-    e.clientX,
-    e.clientY,
-    Math.random() * 50,
-    Math.random() * 50
-  );
+const createCharacterBox = (e) =>
+  Bodies.rectangle(screenWidth / 4, screenHeight / 2 - 25, 50, 50);
 
-window.addEventListener("mousedown", (e) => {
-  Composite.add(engine.world, box(e));
+const characterBox = createCharacterBox();
+
+Composite.add(engine.world, characterBox);
+
+function characterJump() {
+  Matter.Body.setVelocity(characterBox, {
+    x: 0,
+    y: -5,
+  });
+
+}
+
+window.addEventListener("keydown", (e) => {
+  e.preventDefault();
+  if (e.key == " " || e.code == "Space") {
+    characterJump();
+  }
 });
 
 window.addEventListener("touchstart", (e) => {
-  Composite.add(engine.world, box(e));
+  characterJump();
 });
 
 // run the renderer
