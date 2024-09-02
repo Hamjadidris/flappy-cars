@@ -28,9 +28,14 @@ const screenWidth = window.innerWidth;
 const screenHeight = window.innerHeight;
 const halfScreenWidth = screenWidth / 2;
 const halfScreenHeight = screenHeight / 2;
-const characterHeight = 55;
+const characterHeight = 60;
 const characterwidth = 50;
+const barrierWidth = 100;
+const halfBarrierWidth = screenWidth / 10;
 let sceneSpeed = 1;
+let defaultSceneSpeed = 1;
+let sceneInterval = screenWidth < 500 ? 2500 : 3000;
+let defaultSceneInterval = screenWidth < 500 ? 2500 : 3000;
 let scoreTimer = 0;
 
 let canvasOptions = {
@@ -81,7 +86,7 @@ const createCharacterBox = (e) =>
     screenWidth / 4,
     screenHeight / 2 - 25,
     characterwidth,
-    characterwidth,
+    characterHeight,
     characterBoxOptions
   );
 
@@ -127,7 +132,7 @@ const setGameState = function () {
 
       gameInterval = setInterval(() => {
         generateLevelBarriers();
-      }, 4000);
+      }, sceneInterval);
 
       scoreInterval = setInterval(() => {
         scoreTimer++;
@@ -140,6 +145,7 @@ const setGameState = function () {
     end: () => {
       clearInterval(gameInterval);
       clearInterval(scoreInterval);
+      Events.off(engine, "beforeUpdate");
       // hasStarted = false;
     },
   };
@@ -150,9 +156,6 @@ const gameState = setGameState();
 
 function generateLevelBarriers() {
   let barrierHeights = randomBarrierHeights();
-
-  const barrierWidth = screenWidth / 5;
-  const halfBarrierWidth = screenWidth / 10;
 
   const topBarrier = Bodies.rectangle(
     screenWidth + barrierWidth,
@@ -182,8 +185,6 @@ function generateLevelBarriers() {
   Composite.add(world, [topBarrier, bottomBarrier]);
 
   Events.on(engine, "beforeUpdate", function (event) {
-    // console.log('hi');
-
     Matter.Body.setPosition(
       topBarrier,
       {
@@ -202,6 +203,8 @@ function generateLevelBarriers() {
       true
     );
 
+    Matter.Body.rotate(bottomBarrier, 0);
+
     if (
       topBarrier.position.x < -barrierWidth &&
       bottomBarrier.position.x < -barrierWidth
@@ -218,9 +221,11 @@ function generateLevelBarriers() {
         body.bodyA?.label === "character" || body.bodyB?.label === "character"
     );
 
-    if (isColliding) {
+    if (isColliding && scoreTimer > 1) {
       handleCollision();
     }
+
+    handleGameDifficulty();
   });
 }
 
@@ -250,4 +255,14 @@ function randomBarrierHeights() {
 
   heights = [firstBarrierHeight, secondBarrierHeight];
   return heights;
+}
+
+function handleGameDifficulty() {
+  if (sceneSpeed === 3) return;
+  const interval = 50;
+
+  if (scoreTimer < interval) return;
+  if (scoreTimer % interval !== 0) return;
+  sceneSpeed = defaultSceneSpeed + (scoreTimer / interval) * 0.5;
+  sceneInterval = defaultSceneInterval - (scoreTimer / interval) * 200;
 }
