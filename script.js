@@ -51,6 +51,7 @@ let scoreTimer = 0;
 let canvasOptions = {
   height: screenHeight,
   width: screenWidth,
+  wireframes: true
 };
 
 // create a renderer
