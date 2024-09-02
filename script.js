@@ -1,5 +1,15 @@
 const scoreCounterEl = document.querySelector(".score-counter");
+const scoreTextEl = document.querySelector(".score-text");
 const intructionEl = document.querySelector(".instruct-text");
+const startGameBtn = document.querySelector(".start-over");
+const startGameDialogElem = document.getElementById("start-game-dialog");
+const gameOverDialogElem = document.getElementById("game-over-dialog");
+const characterSelectDialogElem = document.getElementById(
+  "character-select-dialog"
+);
+const leadershipBoardDialogElem = document.getElementById(
+  "leadership-board-dialog"
+);
 
 // module aliases
 const Engine = Matter.Engine;
@@ -78,9 +88,6 @@ const bottomWall = Bodies.rectangle(
   }
 );
 
-// add all of the bodies to the world
-Composite.add(world, [topWall, bottomWall]);
-
 const createCharacterBox = (e) =>
   Bodies.rectangle(
     screenWidth / 4,
@@ -90,12 +97,7 @@ const createCharacterBox = (e) =>
     characterBoxOptions
   );
 
-const characterBox = createCharacterBox();
-
-Body.setMass(characterBox, -10);
-// console.log(characterBox);
-
-Composite.add(world, characterBox);
+let characterBox = null;
 
 function characterJump() {
   if (!hasStarted) {
@@ -109,17 +111,6 @@ function characterJump() {
     y: -5,
   });
 }
-
-window.addEventListener("keydown", (e) => {
-  e.preventDefault();
-  if (e.key == " " || e.code == "Space") {
-    characterJump();
-  }
-});
-
-window.addEventListener("touchstart", (e) => {
-  characterJump();
-});
 
 const setGameState = function () {
   let gameInterval = null;
@@ -140,12 +131,15 @@ const setGameState = function () {
       }, 500);
 
       hasStarted = true;
+
+      scoreCounterEl.classList.add("show");
     },
 
     end: () => {
       clearInterval(gameInterval);
       clearInterval(scoreInterval);
       Events.off(engine, "beforeUpdate");
+      scoreCounterEl.classList.remove("show");
       // hasStarted = false;
     },
   };
@@ -153,6 +147,16 @@ const setGameState = function () {
 
 // setGame.start();
 const gameState = setGameState();
+
+startGameBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  Composite.remove(world, characterBox);
+  // Composite.clear(world);
+  // Engine.clear(engine);
+  gameOverDialogElem.close();
+  initWorld();
+  gameState.start();
+});
 
 function generateLevelBarriers() {
   let barrierHeights = randomBarrierHeights();
@@ -232,6 +236,17 @@ function generateLevelBarriers() {
 function handleCollision() {
   console.log("hit");
   gameState.end();
+  window.removeEventListener("keydown", (e) => {
+    e.preventDefault();
+    if (e.key == " " || e.code == "Space") {
+      characterJump();
+    }
+  });
+
+  window.removeEventListener("touchstart", characterJump);
+
+  scoreTextEl.textContent = scoreTimer;
+  gameOverDialogElem.showModal();
 }
 
 // run the renderer
@@ -242,6 +257,31 @@ const runner = Runner.create();
 
 // run the engine
 Runner.run(runner, engine);
+
+initWorld();
+
+//////// Helper Functions ///////
+
+function initWorld() {
+  characterBox = createCharacterBox();
+  Body.setMass(characterBox, -10);
+
+  Composite.add(world, [topWall, bottomWall]);
+  Composite.add(world, characterBox);
+
+  sceneSpeed = defaultSceneSpeed;
+  sceneInterval = defaultSceneInterval;
+  scoreTimer = 0;
+
+  window.addEventListener("keydown", (e) => {
+    e.preventDefault();
+    if (e.key == " " || e.code == "Space") {
+      characterJump();
+    }
+  });
+
+  window.addEventListener("touchstart", characterJump);
+}
 
 function randomBarrierHeights() {
   let heights = [];

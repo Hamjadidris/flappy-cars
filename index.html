@@ -44,6 +44,29 @@
   </head>
   <body>
     <p class="instruct-text">Tap to start</p>
-    <p class="score-counter">0</p>
+    <p class="score-counter hide">0</p>
+
+    <dialog id="start-game-dialog" class="dialog start-game-dialog">
+      Content here
+      <button class="close">Start Game</button>
+    </dialog>
+
+    <dialog id="game-over-dialog" class="dialog game-over-dialog">
+      Content here
+      <h2 class="">Game over</h2>
+      <p class="score-text"></p>
+      <button class="start-over">Play Again</button>
+    </dialog>
+
+    <dialog id="character-select-dialog" class="dialog character-select-dialog">
+      Content here
+      <h2 class="">Character Select</h2>
+    </dialog>
+
+    <dialog id="leadership-board-dialog" class="dialog leadership-board-dialog">
+      <h2 class="">Leadership board</h2>
+
+      <button class="close">close</button>
+    </dialog>
   </body>
 </html>
