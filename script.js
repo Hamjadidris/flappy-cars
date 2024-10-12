@@ -1,7 +1,44 @@
+const characters = [
+  {
+    name: "Cat",
+    src: "./assets/cat.png",
+  },
+  {
+    name: "Solja Boi",
+    src: "./assets/soljaBoi.png",
+  },
+  {
+    name: "CuhBoi",
+    src: "./assets/cuhBoi.png",
+  },
+  {
+    name: "Kitten",
+    src: "./assets/kitten.png",
+  },
+  {
+    name: "Silly Boy",
+    src: "./assets/sillyBoi.png",
+  },
+  {
+    name: "Silly Nibbly",
+    src: "./assets/sillyNibbly.png",
+  },
+  {
+    name: "Urrgh",
+    src: "./assets/urrgh.png",
+  },
+  {
+    name: "Trubgo Tuesday (watch out)",
+    src: "./assets/trubgoTuesday.png",
+  },
+];
+
 const scoreCounterEl = document.querySelector(".score-counter");
 const scoreTextEl = document.querySelector(".score-text");
 const intructionEl = document.querySelector(".instruct-text");
 const startGameBtn = document.querySelector(".start-over");
+const charactersContainer = document.querySelector(".characters-container");
+const leadershipBoardBtn = document.querySelector(".leadership-board-btn");
 const startGameDialogElem = document.getElementById("start-game-dialog");
 const gameOverDialogElem = document.getElementById("game-over-dialog");
 const characterSelectDialogElem = document.getElementById(
@@ -34,6 +71,7 @@ const barrierCategory = 0x0001;
 const characterCategory = 0x0002;
 
 let hasStarted = false;
+let hasCollided = false;
 const screenWidth = window.innerWidth;
 const screenHeight = window.innerHeight;
 const halfScreenWidth = screenWidth / 2;
@@ -51,7 +89,8 @@ let scoreTimer = 0;
 let canvasOptions = {
   height: screenHeight,
   width: screenWidth,
-  wireframes: true
+  wireframes: false,
+  background: "transparent",
 };
 
 // create a renderer
@@ -66,7 +105,8 @@ const wallOptions = {
     category: barrierCategory,
   },
 };
-const characterBoxOptions = {
+
+let characterBoxOptions = {
   label: "character",
   collisionFilter: {
     category: characterCategory,
@@ -89,14 +129,29 @@ const bottomWall = Bodies.rectangle(
   }
 );
 
-const createCharacterBox = (e) =>
-  Bodies.rectangle(
+const createCharacterBox = (e) => {
+  const characterName = localStorage.getItem("characterName") || "Cat";
+  const characterData = characters.find(
+    (character) => characterName === character.name
+  );
+
+  characterBoxOptions = {
+    ...characterBoxOptions,
+    render: {
+      sprite: {
+        texture: characterData.src,
+      },
+    },
+  };
+
+  return Bodies.rectangle(
     screenWidth / 4,
     screenHeight / 2 - 25,
     characterwidth,
     characterHeight,
     characterBoxOptions
   );
+};
 
 let characterBox = null;
 
@@ -104,7 +159,7 @@ function characterJump() {
   if (!hasStarted) {
     intructionEl.textContent = "";
     // Start game
-    gameState.start();
+    GameState.start();
   }
 
   Matter.Body.setVelocity(characterBox, {
@@ -121,7 +176,7 @@ const setGameState = function () {
   return {
     start: () => {
       generateLevelBarriers();
-
+      hasCollided = false;
       gameInterval = setInterval(() => {
         generateLevelBarriers();
       }, sceneInterval);
@@ -133,21 +188,21 @@ const setGameState = function () {
 
       hasStarted = true;
 
-      scoreCounterEl.classList.add("show");
+      scoreCounterEl.parentElement.classList.add("show");
     },
 
     end: () => {
+      hasCollided = true;
       clearInterval(gameInterval);
       clearInterval(scoreInterval);
       Events.off(engine, "beforeUpdate");
-      scoreCounterEl.classList.remove("show");
+      scoreCounterEl.parentElement.classList.remove("show");
       // hasStarted = false;
     },
   };
 };
 
-// setGame.start();
-const gameState = setGameState();
+const GameState = setGameState();
 
 startGameBtn.addEventListener("click", (e) => {
   e.preventDefault();
@@ -155,8 +210,8 @@ startGameBtn.addEventListener("click", (e) => {
   // Composite.clear(world);
   // Engine.clear(engine);
   gameOverDialogElem.close();
-  initWorld();
-  gameState.start();
+  resetWorld();
+  GameState.start();
 });
 
 function generateLevelBarriers() {
@@ -227,29 +282,44 @@ function generateLevelBarriers() {
     );
 
     if (isColliding && scoreTimer > 1) {
+      if (hasCollided) return;
       handleCollision();
+      Matter.Detector.clear(detector);
     }
 
     handleGameDifficulty();
   });
 }
 
-function handleCollision() {
-  console.log("hit");
-  gameState.end();
-  window.removeEventListener("keydown", (e) => {
-    e.preventDefault();
-    if (e.key == " " || e.code == "Space") {
-      characterJump();
-    }
+const populateCharactersDisplay = () => {
+  characters.forEach((character) => {
+    const characterElement = document.createElement("button");
+    const joinedName = character.name.replaceAll(" ", "");
+    characterElement.classList.add("character-btn", joinedName);
+    characterElement.innerHTML = `
+    <div onclick="handleShowCharacterSelect().selectCharacter('${character.name}')" class="character-info">
+        <img src="${character.src}" alt="${character.name}" class="character-img" >
+
+        <p class="character-name" > ${character.name}</p>
+    </div>
+    `;
+    charactersContainer.appendChild(characterElement);
   });
+  toggleActiveCharacter();
+};
 
-  window.removeEventListener("touchstart", characterJump);
+const toggleActiveCharacter = () => {
+  const characterName = localStorage.getItem("characterName") || "Cat";
+  const joinedName = characterName.replaceAll(" ", "");
+  const children = charactersContainer.children;
 
-  scoreTextEl.textContent = scoreTimer;
-  gameOverDialogElem.showModal();
-}
-
+  for (const child of children) {
+    child.classList.remove("character-active");
+    if (child.classList.contains(joinedName)) {
+      child.classList.add("character-active");
+    }
+  }
+};
 // run the renderer
 Render.run(render);
 
@@ -260,6 +330,7 @@ const runner = Runner.create();
 Runner.run(runner, engine);
 
 initWorld();
+populateCharactersDisplay();
 
 //////// Helper Functions ///////
 
@@ -284,6 +355,60 @@ function initWorld() {
   window.addEventListener("touchstart", characterJump);
 }
 
+function resetWorld() {
+  removeEvents();
+  Composite.clear(world, true);
+  initWorld();
+}
+
+function handleGameScore(score) {
+  const highScore = parseInt(localStorage.getItem("highScore"));
+  const isNewHighscore = score > highScore;
+  const scoreString = `Score <br/> ${scoreTimer}`;
+  const highScoreString = `New High Score!!! <br/> ${scoreTimer}`;
+
+  if (!highScore) {
+    localStorage.setItem("highScore", score);
+    scoreTextEl.innerHTML = scoreString;
+  } else if (isNewHighscore) {
+    localStorage.setItem("highScore", score);
+    scoreTextEl.style.fontSize = "24px";
+    scoreTextEl.innerHTML = highScoreString;
+  } else {
+    scoreTextEl.innerHTML = scoreString;
+  }
+}
+
+function removeEvents() {
+  window.removeEventListener("keydown", (e) => {
+    e.preventDefault();
+    if (e.key == " " || e.code == "Space") {
+      characterJump();
+    }
+  });
+  window.removeEventListener("touchstart", characterJump);
+}
+
+function handleCollision() {
+  console.log("hit");
+  GameState.end();
+  removeEvents();
+  handleGameScore(scoreTimer);
+  gameOverDialogElem.showModal();
+}
+
+function handleShowCharacterSelect() {
+  const open = () => characterSelectDialogElem.showModal();
+  const close = () => characterSelectDialogElem.close();
+
+  const selectCharacter = (character) => {
+    localStorage.setItem("characterName", character);
+    toggleActiveCharacter();
+  };
+
+  return { open, close, selectCharacter };
+}
+
 function randomBarrierHeights() {
   let heights = [];
   const randomNum = Math.floor(Math.random() * 5) + 4;
@@ -306,4 +431,17 @@ function handleGameDifficulty() {
   if (scoreTimer % interval !== 0) return;
   sceneSpeed = defaultSceneSpeed + (scoreTimer / interval) * 0.5;
   sceneInterval = defaultSceneInterval - (scoreTimer / interval) * 200;
+}
+
+function debounce(fn, wait) {
+  let timer;
+  return function (...args) {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    const context = this;
+    timer = setTimeout(() => {
+      fn.apply(context, args);
+    }, wait);
+  };
 }

@@ -44,7 +44,11 @@
   </head>
   <body>
     <p class="instruct-text">Tap to start</p>
-    <p class="score-counter hide">0</p>
+
+    <div class="score-counter-container hide">
+      <img src="/assets/spinLad.gif" alt="spinning cat" class="" />
+      <p class="score-counter">0</p>
+    </div>
 
     <dialog id="start-game-dialog" class="dialog start-game-dialog">
       Content here
@@ -52,15 +56,39 @@
     </dialog>
 
     <dialog id="game-over-dialog" class="dialog game-over-dialog">
-      Content here
-      <h2 class="">Game over</h2>
-      <p class="score-text"></p>
-      <button class="start-over">Play Again</button>
+      <div class="">
+        <h2 class="pixel-font">GAME OVER</h2>
+        <p class="score-text"></p>
+        <img src="/assets/gromker.gif" alt="gromker" class="" />
+
+        <div class="game-over-dialog-buttons">
+          <button class="start-over pixel-font">Play Again</button>
+          <button
+            class="character-select-btn pixel-font"
+            onclick="handleShowCharacterSelect().open()"
+          >
+            Character Select
+          </button>
+          <button class="leadership-board-btn pixel-font">
+            Leadership Board
+          </button>
+        </div>
+      </div>
     </dialog>
 
     <dialog id="character-select-dialog" class="dialog character-select-dialog">
-      Content here
-      <h2 class="">Character Select</h2>
+      <div class="">
+        <h2 class="pixel-font">Character Select</h2>
+
+        <div class="characters-container"></div>
+
+        <button
+          class="character-select-dialog-close"
+          onclick="handleShowCharacterSelect().close()"
+        >
+          close
+        </button>
+      </div>
     </dialog>
 
     <dialog id="leadership-board-dialog" class="dialog leadership-board-dialog">
