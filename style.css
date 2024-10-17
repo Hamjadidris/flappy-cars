@@ -17,7 +17,7 @@ body {
   height: 100dvh;
   width: 100vw;
   overflow-y: hidden;
-  background: url("./assets/flappyBg.jpeg") center left no-repeat;
+  background: url("./assets/flappyBg4.gif") center center no-repeat;
   background-size: cover;
 }
 
