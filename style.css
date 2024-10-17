@@ -81,10 +81,11 @@ dialog {
   gap: 1rem;
 }
 
-.game-over-dialog button,
+.game-over-dialog-buttons button,
 .character-select-dialog button {
   border: none;
   background-color: transparent;
+  color: #000;
 }
 
 .game-over-dialog img {
@@ -117,14 +118,13 @@ dialog {
   justify-content: space-evenly;
   gap: 1rem;
   background-color: #5a189a;
+}
 
-  p {
-    color: #fff;
-  }
-
-  img {
-    width: 100%;
-  }
+.character-btn div p {
+  color: #fff;
+}
+.character-btn div img {
+  width: 100%;
 }
 
 .character-btn.character-active {

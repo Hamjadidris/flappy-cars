@@ -4,6 +4,10 @@ const characters = [
     src: "./assets/cat.png",
   },
   {
+    name: "Kitten",
+    src: "./assets/kitten.png",
+  },
+  {
     name: "Solja Boi",
     src: "./assets/soljaBoi.png",
   },
@@ -12,12 +16,12 @@ const characters = [
     src: "./assets/cuhBoi.png",
   },
   {
-    name: "Kitten",
-    src: "./assets/kitten.png",
-  },
-  {
     name: "Silly Boy",
     src: "./assets/sillyBoi.png",
+  },
+  {
+    name: "Un-silly Boy",
+    src: "./assets/un-sillyBoi.png",
   },
   {
     name: "Silly Nibbly",
@@ -26,6 +30,14 @@ const characters = [
   {
     name: "Urrgh",
     src: "./assets/urrgh.png",
+  },
+  {
+    name: "Quetzkol The Incomprehensible Deity",
+    src: "./assets/QuetzkolTheIncomprehensibleDeity.png",
+  },
+  {
+    name: "Eepy Sleebjy",
+    src: "./assets/eepySleebjy.png",
   },
   {
     name: "Trubgo Tuesday (watch out)",
