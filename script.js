@@ -45,6 +45,29 @@ const characters = [
   },
 ];
 
+const gameOverContent = [
+  {
+    text: "Game Over",
+    src: "./assets/spinLad.gif",
+  },
+  {
+    text: "You lost, how- how could you?",
+    src: "./assets/sadcat.gif",
+  },
+  {
+    text: "Better luck next time!!",
+    src: "./assets/spinLad.gif",
+  },
+  {
+    text: "Pretty decent score you got there",
+    src: "./assets/gromker.gif",
+  },
+  {
+    text: "Hell Yeah",
+    src: "./assets/gromker.gif",
+  },
+];
+
 const scoreCounterEl = document.querySelector(".score-counter");
 const scoreTextEl = document.querySelector(".score-text");
 const intructionEl = document.querySelector(".instruct-text");
@@ -53,6 +76,8 @@ const charactersContainer = document.querySelector(".characters-container");
 const leadershipBoardBtn = document.querySelector(".leadership-board-btn");
 const startGameDialogElem = document.getElementById("start-game-dialog");
 const gameOverDialogElem = document.getElementById("game-over-dialog");
+const gameOverText = document.querySelector(".game-over-text");
+const gameOverImg = document.querySelector(".game-over-img");
 const characterSelectDialogElem = document.getElementById(
   "character-select-dialog"
 );
@@ -369,7 +394,6 @@ function initWorld() {
 
 function resetWorld() {
   removeEvents();
-  Composite.clear(world, true);
   initWorld();
 }
 
@@ -377,18 +401,32 @@ function handleGameScore(score) {
   const highScore = parseInt(localStorage.getItem("highScore"));
   const isNewHighscore = score > highScore;
   const scoreString = `Score <br/> ${scoreTimer}`;
+  scoreTextEl.style.fontSize = "1.5rem";
   const highScoreString = `New High Score!!! <br/> ${scoreTimer}`;
+  const gameOverContentAmount = gameOverContent.length;
 
   if (!highScore) {
     localStorage.setItem("highScore", score);
     scoreTextEl.innerHTML = scoreString;
+    setGameModalContent(gameOverContent[0]);
   } else if (isNewHighscore) {
     localStorage.setItem("highScore", score);
     scoreTextEl.style.fontSize = "24px";
     scoreTextEl.innerHTML = highScoreString;
+    setGameModalContent(
+      gameOverContent[getRandomNumber(2) + (gameOverContentAmount - 2)]
+    );
   } else {
+    setGameModalContent(
+      gameOverContent[getRandomNumber(gameOverContentAmount - 2)]
+    );
     scoreTextEl.innerHTML = scoreString;
   }
+}
+
+function setGameModalContent({ text, src } = { text: "", src: "" }) {
+  gameOverText.innerHTML = text;
+  gameOverImg.src = src;
 }
 
 function removeEvents() {
@@ -402,11 +440,13 @@ function removeEvents() {
 }
 
 function handleCollision() {
-  console.log("hit");
   GameState.end();
   removeEvents();
   handleGameScore(scoreTimer);
   gameOverDialogElem.showModal();
+  setTimeout(() => {
+    Composite.clear(world, true);
+  }, 3000);
 }
 
 function handleShowCharacterSelect() {
@@ -423,7 +463,7 @@ function handleShowCharacterSelect() {
 
 function randomBarrierHeights() {
   let heights = [];
-  const randomNum = Math.floor(Math.random() * 5) + 4;
+  const randomNum = getRandomNumber(5) + 4;
 
   const firstBarrierHeight =
     screenHeight - Math.floor(screenHeight * (randomNum / 10));
@@ -443,6 +483,11 @@ function handleGameDifficulty() {
   if (scoreTimer % interval !== 0) return;
   sceneSpeed = defaultSceneSpeed + (scoreTimer / interval) * 0.5;
   sceneInterval = defaultSceneInterval - (scoreTimer / interval) * 200;
+}
+
+function getRandomNumber(maxNumber = 1) {
+  const randomNum = Math.floor(Math.random() * maxNumber);
+  return randomNum;
 }
 
 function debounce(fn, wait) {
