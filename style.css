@@ -83,12 +83,14 @@ dialog {
   gap: 1rem;
 }
 
-.game-over-dialog div h2{
+.game-over-dialog div h2 {
   font-size: 2.5rem;
 }
 
 .game-over-dialog-buttons button,
-.character-select-dialog button {
+.character-select-dialog button,
+.leadership-board-close-btn,
+.leadership-join-btn {
   border: none;
   background-color: transparent;
   color: #000;
@@ -123,7 +125,7 @@ dialog {
   align-items: center;
   justify-content: space-evenly;
   gap: 1rem;
-  background-color: #5a189a;
+  background-color: #8d189a;
 }
 
 .character-btn div p {
@@ -143,6 +145,91 @@ dialog {
   background-size: 100px 100px;
   animation: move-it 2s linear infinite;
   padding: 0.5rem;
+}
+
+.leadership-container {
+  margin-top: 2rem;
+  max-height: 60vh;
+  overflow-y: scroll;
+}
+
+.leadership-join-btn {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  text-decoration: underline;
+}
+
+.board-entry-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.board-entry-container img {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: 9999px;
+  background-color: #9a188fc0;
+  border: 1px solid #e93ae2;
+}
+
+.board-entry-container div {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.board-entry-name {
+  font-size: 1.1rem;
+  color: #575757;
+}
+
+.board-entry-character {
+  font-size: 0.9rem;
+  color: #828282;
+}
+
+.leadership-board-close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.leadership-loader {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.leadership-loader img {
+  height: 3rem;
+  object-fit: contain;
+}
+
+.join-leadership-form {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.join-leadership-form input {
+  padding: 0.5rem 1rem;
+
+}
+
+.join-leadership-form button {
+  padding: 0.5rem 3rem;
+  background-color: #875383c0;
+  border: 1px solid #4e134c;
 }
 
 dialog[open] {
@@ -206,5 +293,11 @@ dialog[open]::backdrop {
   body {
     background: url("./assets/flappyBgLarge.gif") center center no-repeat;
     background-size: cover;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0;
   }
 }

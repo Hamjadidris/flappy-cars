@@ -73,7 +73,11 @@ const scoreTextEl = document.querySelector(".score-text");
 const intructionEl = document.querySelector(".instruct-text");
 const startGameBtn = document.querySelector(".start-over");
 const charactersContainer = document.querySelector(".characters-container");
+const leadershipContainer = document.getElementById("leadership-container");
 const leadershipBoardBtn = document.querySelector(".leadership-board-btn");
+const leadershipJoinBtn = document.querySelector(".leadership-join-btn");
+const joinLeadershipForm = document.querySelector(".join-leadership-form");
+const leadershipLoaderEl = document.querySelector(".leadership-loader");
 const startGameDialogElem = document.getElementById("start-game-dialog");
 const gameOverDialogElem = document.getElementById("game-over-dialog");
 const gameOverText = document.querySelector(".game-over-text");
@@ -84,6 +88,7 @@ const characterSelectDialogElem = document.getElementById(
 const leadershipBoardDialogElem = document.getElementById(
   "leadership-board-dialog"
 );
+const leadershipBoardUrl = "https://flappycar.onrender.com";
 
 // module aliases
 const Engine = Matter.Engine;
@@ -122,6 +127,7 @@ let defaultSceneSpeed = 1;
 let sceneInterval = screenWidth < 500 ? 2500 : 3000;
 let defaultSceneInterval = screenWidth < 500 ? 2500 : 3000;
 let scoreTimer = 0;
+let showloading = false;
 
 let canvasOptions = {
   height: screenHeight,
@@ -329,6 +335,7 @@ function generateLevelBarriers() {
 }
 
 const populateCharactersDisplay = () => {
+  if (charactersContainer.childNodes.length) return;
   characters.forEach((character) => {
     const characterElement = document.createElement("button");
     const joinedName = character.name.replaceAll(" ", "");
@@ -367,7 +374,6 @@ const runner = Runner.create();
 Runner.run(runner, engine);
 
 initWorld();
-populateCharactersDisplay();
 
 //////// Helper Functions ///////
 
@@ -446,11 +452,15 @@ function handleCollision() {
   gameOverDialogElem.showModal();
   setTimeout(() => {
     Composite.clear(world, true);
-  }, 3000);
+  }, 1000);
 }
 
 function handleShowCharacterSelect() {
-  const open = () => characterSelectDialogElem.showModal();
+  const open = () => {
+    populateCharactersDisplay();
+    characterSelectDialogElem.showModal();
+  };
+
   const close = () => characterSelectDialogElem.close();
 
   const selectCharacter = (character) => {
@@ -459,6 +469,106 @@ function handleShowCharacterSelect() {
   };
 
   return { open, close, selectCharacter };
+}
+
+function handleShowLeadershipBoard() {
+  const open = () => {
+    leadershipBoardDialogElem.showModal();
+    fetchLeadershipBoard();
+  };
+
+  const close = () => leadershipBoardDialogElem.close();
+
+  return { open, close };
+}
+
+async function fetchLeadershipBoard() {
+  joinLeadershipForm.style.display = "none";
+  leadershipLoaderEl.style.display = "flex";
+
+  try {
+    const res = await fetch(leadershipBoardUrl + "/getLeadershipBoard");
+    const data = await res.json();
+    leadershipJoinBtn.style.display = "inline-block";
+    leadershipLoaderEl.style.display = "none";
+    leadershipContainer.innerHTML = "";
+    leadershipContainer.style.display = "block";
+    data.forEach(populateLeadershipBoard);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    showloading = false;
+  }
+}
+
+function populateLeadershipBoard(entry) {
+  const scoreEl = document.createElement("div");
+
+  const characterData = characters.find(
+    (character) => character.name === entry.character
+  );
+
+  const characterImage = characterData?.src || characters[0].src;
+
+  scoreEl.classList.add("board-entry-container");
+
+  scoreEl.innerHTML = `
+      <img src="${characterImage}" alt="${entry.playerName}" class="entry-img" >
+
+      <div>
+        <p class="board-entry-name" > ${entry.playerName}</p>
+        <p class="board-entry-character" > ${entry.character}</p>
+      </div>
+
+      <p class="pixel-font">
+        ${entry.playerScore}
+      </p>
+  `;
+
+  leadershipContainer.appendChild(scoreEl);
+}
+
+leadershipJoinBtn.addEventListener("click", () => {
+  leadershipLoaderEl.style.display = "none";
+  leadershipContainer.style.display = "none";
+  leadershipJoinBtn.style.display = "none";
+  joinLeadershipForm.style.display = "flex";
+});
+
+joinLeadershipForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  submitScore(e.target);
+});
+
+async function submitScore(formEl) {
+  const character = localStorage.getItem("characterName") || "Cat";
+  const playerScore = scoreTimer;
+  const playerName = formEl.children[0].value;
+  formEl.children[1].innerHTML = "Submitting...";
+
+  const myHeaders = new Headers();
+  myHeaders.append("Content-Type", "application/json");
+
+  const raw = JSON.stringify({ character, playerName, playerScore });
+
+  const requestOptions = {
+    method: "POST",
+    headers: myHeaders,
+    body: raw,
+    redirect: "follow",
+  };
+
+  try {
+    const res = await fetch(
+      leadershipBoardUrl + "/joinLeadershipBoard",
+      requestOptions
+    );
+    const data = await res.json();
+    fetchLeadershipBoard();
+  } catch (error) {
+    formEl.children[1].innerHTML = "Submit";
+    console.log(error);
+  }
 }
 
 function randomBarrierHeights() {

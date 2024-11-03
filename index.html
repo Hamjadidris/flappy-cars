@@ -42,6 +42,7 @@
       rel="stylesheet"
     />
   </head>
+
   <body>
     <p class="instruct-text">Tap to start</p>
 
@@ -70,8 +71,11 @@
           >
             Character Select
           </button>
-          
-          <button class="leadership-board-btn pixel-font">
+
+          <button
+            onclick="handleShowLeadershipBoard().open()"
+            class="leadership-board-btn pixel-font"
+          >
             Leadership Board
           </button>
         </div>
@@ -94,9 +98,39 @@
     </dialog>
 
     <dialog id="leadership-board-dialog" class="dialog leadership-board-dialog">
-      <h2 class="">Leadership board</h2>
+      <div class="">
+        <h2 class="pixel-font">Leadership board</h2>
 
-      <button class="close">close</button>
+        <button class="leadership-join-btn hide">Join</button>
+
+        <div class="leadership-loader">
+          <img src="assets/spinLad.gif" alt="spinning cat" class="" />
+          <p class="">Loading...</p>
+        </div>
+
+        <div id="leadership-container" class="leadership-container"></div>
+
+        <form class="join-leadership-form hide">
+          <input
+            type="text"
+            name="name"
+            id="name"
+            minlength="0"
+            maxlength="15"
+            placeholder="Type in a name"
+            class="player-name-input"
+          />
+
+          <button class="submit-btn pixel-font">Submit</button>
+        </form>
+
+        <button
+          onclick="handleShowLeadershipBoard().close()"
+          class="leadership-board-close-btn"
+        >
+          ✕
+        </button>
+      </div>
     </dialog>
   </body>
 </html>
